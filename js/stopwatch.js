@@ -1,72 +1,128 @@
-document.querySelector('#start').addEventListener('click', function (){
-    setInterval (startTimer, 100);
-} );
-colors()
 
-var stopwatch = document.querySelector('#timer');
-var startButton = document.querySelector('#start')
-var minutes = 0
-var seconds = 0
+var startButton = document.querySelector('#start') //thrown to the top to be used as a shared variable //click 
+var timeDisplay = document.querySelector('#timeDisplay') //timer display 
 var tenths = 0
-var counter;
+var seconds = 0 
+var minutes = 0
+var interval;
 
+//LOGIC
+makeStartButtonClickable();
+makeStartButtonDoubleClickable();
 
-function startTimer (){
-    tenths++
-    stopwatch.innerText = `${minutes}: ${seconds}: ${tenths}`
-    if (tenths >= 60) {
-        tenths = 0;
-        seconds++;  
-    }
-
-    if (seconds >= 60) {
-        seconds = 0;
-        minutes++;
-        colors
-       
-    }
-
-    // if (minutes >= 60) {
-    //     minutes = 5;
-    // //    minutes.style.color = 'green'
-    //      window.location.href = 'https://google.com';
-    // }  
-}   
-
-function colors() {
-    document.addEventListener('click', function(e) {
-    var red = Math.round(Math.random()*255);
-    var green = Math.round(Math.random()*255);
-    var blue = Math.round(Math.random()*255);
-    style.color = `rgb(${red} ${green} ${blue})`;
-}); 
+//FUNCTIONS
+// Clicking when the button says "Start" should...
+//start button is defined in this function 
+function makeStartButtonClickable(){  
+    startButton.addEventListener('click', startWatch) 
 }
-// button
-function timerButton(){
-    document.addEventListener('click', function(e){
-    startButton.innerHTML = 'Start'
-    if (e.target.innerHTML === 'Start') {
-        e.target.innerHTML = 'Pause'
-        // counter = setInterval (startTimer, 10)
-        counter = setInterval (startTimer, 100)
-        
+
+//dbl click defined in this function 
+function makeStartButtonDoubleClickable(){  
+    startButton.addEventListener('dblclick', resetWatch) 
+}
+
+// e - is used to call an e.target 
+// Trim was added to get rid of extra space
+// Every 'something' does something - use SET INTERVAL      
+
+function startWatch() {
+    if (startButton.innerHTML.trim() === "Start") { 
+    //everything is operating on the thing to the left of it
+    // start a group of things at the same time
+    //set interval returns a number
+        startUpdatingTimer(); 
+    
+        //Chnage button to say pause
+        changeButtonToSayPause();                
+    }   
+    else if (startButton.innerHTML.trim()==='Pause') {
+        pauseTimerFromCountingUp();
+        setTimeout(resetTimerAfter15Seconds, 15000);
+        changeButtonToSayResume();
+    }    
+
+    //clicking when the button says resume should...
+    else if (startButton.innerHTML.trim() === 'Resume') {
+        startUpdatingTimer();
+        changeButtonToSayPause();
+    }                                                                   
+}                     
+
+function resetWatch() {
+    if (startButton.innerHTML.trim() === 'Pause') {
+        pauseTimerFromCountingUp();
+        resetTimersBackToZero(); 
+        updateTimerDisplay();
+        changeButtonToSayStart();
     }
-    else if (e.target.innerHTML === 'Resume') {
-        e.target.innerHTML = 'Pause'
-        // counter = setInterval (startTimer, 10)
-        counter = setInterval (startTimer, 100)
-     }
-    })
- }
+}
 
+function updateTimer() {
+    startCountingUpEveryTenth();
+    updateTimerDisplay();
+    if (tenths === 0){
+        changeColorOfTimerEachSecond();
+    }
+} 
 
+  //two IF's because both things can happen at the same time - else if is conditional and cant run at the same time
+function startCountingUpEveryTenth(){
+    tenths++;
+    if (tenths === 9) {
+        seconds++
+        tenths = 0  
+    }
+    if (seconds === 59) { 
+        minutes++ 
+        seconds = 0 
+    }
+}
 
+function updateTimerDisplay() {
+    timeDisplay.innerHTML = `${minutes}:${seconds}:${tenths}`
+}
 
+function changeColorOfTimerEachSecond () {
+    var red = _randomNumber(255);
+    var green = _randomNumber(255);
+    var blue = _randomNumber(255);
+    timeDisplay.style.color = `rgb(${red}, ${green}, ${blue})`;
+}
 
+function changeButtonToSayPause() {
+    startButton.innerHTML = 'Pause';
+}
+function pauseTimerFromCountingUp() {
+    clearInterval(interval);
+}
+function startUpdatingTimer() {
+    interval = setInterval(updateTimer, 100);
+}
+function changeButtonToSayResume() {
+    startButton.innerHTML = 'Resume'
+}
 
+function changeButtonToSayStart() {
+    startButton.innerHTML = 'Start'
+}
 
+function resetTimersBackToZero(){
+    tenths = 0;
+    minutes = 0;
+    seconds = 0;
+}
 
+function resetTimerAfter15Seconds() {
+    if (startButton.innerHTML.trim() === 'Resume') {
+        pauseTimerFromCountingUp();
+        resetTimersBackToZero();
+        updateTimerDisplay();
+        changeButtonToSayStart();
+    }
+}
 
-
-
-
+//underscore is used for private - utility things - HELPER
+function _randomNumber(max) {  
+    return Math.round(Math.random() * max);
+}
